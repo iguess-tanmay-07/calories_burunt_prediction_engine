@@ -2,10 +2,10 @@ import streamlit as st
 import pickle
 import numpy as np
 
-# Page configuration for proper spacing (Not looking like a popup)
-st.set_page_config(page_title="Wellness Prediction Engine", layout="centered")
+# Page standard alignment controls (Wider spacing layout)
+st.set_page_config(page_title="Wellness Tracker", layout="centered")
 
-# 1. LOAD YOUR TRAINED XGBOOST MODEL
+# LOAD THE MACHINE LEARNING MODEL (.pkl file matches)
 @st.cache_resource
 def load_model():
     try:
@@ -18,204 +18,192 @@ def load_model():
 try:
     model = load_model()
 except Exception as e:
-    st.error(f"Model load nahi ho paya: {e}")
+    st.error(f"Model File Error: {e}")
     model = None
 
-# Hide default Streamlit structural blocks cleanly
+# Custom styling to inject global changes to native inputs (Matching the mockup layout)
 st.markdown("""
-    <style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    /* Clean standard frame wrappers */
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     header {visibility: hidden;}
-    .block-container {padding-top: 1rem; max-width: 100%;}
-    </style>
+    
+    .stApp {
+        background-color: #0e1117 !important;
+        font-family: 'Plus Jakarta Sans', sans-serif !important;
+    }
+    
+    /* Central Baseline Container Box */
+    .main-flat-card {
+        background-color: #fcf8f2;
+        border-radius: 24px;
+        padding: 36px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+        max-width: 660px;
+        margin: 20px auto;
+    }
+    
+    /* Circle Layout Metrics Viewport */
+    .circle-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-bottom: 24px;
+    }
+    .counter-circle {
+        width: 140px;
+        height: 140px;
+        border-radius: 50%;
+        border: 4px solid #ebd9cb;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: #fcf8f2;
+        margin-bottom: 12px;
+    }
+    .metric-number {
+        font-size: 2.5rem;
+        font-weight: 600;
+        color: #4a3629;
+    }
+    .metric-title {
+        font-size: 1.15rem;
+        font-weight: 600;
+        color: #634737;
+        margin-bottom: 2px;
+    }
+    .metric-sub {
+        font-size: 0.9rem;
+        color: #a48674;
+    }
+    
+    /* Structural Metadata Text Blocks */
+    .grid-header {
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: #c0967a;
+        letter-spacing: 0.05em;
+        margin-bottom: 16px;
+        text-transform: uppercase;
+    }
+    
+    /* Restyle native streamlit forms transparently */
+    div[data-testid="stForm"] {
+        border: none !important;
+        padding: 0 !important;
+        background: transparent !important;
+    }
+    
+    .stSelectbox label, .stNumberInput label {
+        font-size: 0.8rem !important;
+        color: #bfa18f !important;
+        font-weight: 600 !important;
+        text-transform: uppercase;
+        margin-bottom: 4px !important;
+    }
+    
+    div[data-baseweb="select"], div[data-baseweb="input"] {
+        background-color: #ffffff !important;
+        border: 1px solid #ebd9cb !important;
+        border-radius: 12px !important;
+    }
+    
+    input {
+        color: #4a3629 !important;
+        font-size: 1.2rem !important;
+        font-weight: 600 !important;
+    }
+    
+    .tip-container {
+        background-color: #f2e7dd;
+        border-radius: 12px;
+        padding: 16px;
+        font-size: 0.9rem;
+        color: #7d5a44;
+        margin-top: 24px;
+        margin-bottom: 20px;
+    }
+    
+    /* Native calculation button overwrite */
+    div.stButton > button {
+        background-color: #ca8a56 !important;
+        color: #ffffff !important;
+        border: none !important;
+        border-radius: 12px !important;
+        padding: 16px 24px !important;
+        font-size: 1rem !important;
+        font-weight: 600 !important;
+        width: 100% !important;
+        text-align: left !important;
+        transition: background-color 0.2s ease !important;
+    }
+    div.stButton > button:hover {
+        background-color: #b57747 !important;
+        color: #ffffff !important;
+    }
+</style>
 """, unsafe_allow_html=True)
 
-# 2. SESSION STATE MANAGEMENT FOR CALORIES
-if 'predicted_calories' not in st.session_state:
-    st.session_state.predicted_calories = 487
+# Tracks output memory state safely across button interactions
+if 'computed_value' not in st.session_state:
+    st.session_state.computed_value = 487
 
-# 3. CAPTURE DATA FROM THE INLINE FORM SUBMISSION
-query_params = st.query_params
-if 'calc' in query_params:
-    try:
-        gender_val = 0 if query_params.get('gender', 'Male') == 'Male' else 1
-        age_val = int(query_params.get('age', 25))
-        height_val = float(query_params.get('height', 175))
-        weight_val = float(query_params.get('weight', 72))
-        duration_val = float(query_params.get('duration', 45))
-        hr_val = float(query_params.get('heart_rate', 138))
-        temp_val = float(query_params.get('body_temp', 37.0))
-        
-        if model is not None:
-            # Exact Kaggle feature matrix schema order
-            features = np.array([[gender_val, age_val, height_val, weight_val, duration_val, hr_val, temp_val]])
-            prediction = model.predict(features)[0]
-            st.session_state.predicted_calories = max(0, round(float(prediction)))
-        
-        # Clear string queries to prevent calculation loop traps
-        st.query_params.clear()
-        st.rerun()
-    except Exception as e:
-        st.error(f"Calculation mapping crash: {e}")
+# START BUILDING CONTAINER INNER CONTENT
+st.markdown('<div class="main-flat-card">', unsafe_allow_html=True)
 
-# 4. PURE CLEAN CUSTOM CSS & SEMANTIC FORM ELEMENT GRID
-html_template = f"""
-<!DOCTYPE html>
-<html>
-<head>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    * {{ box-sizing: border-box; margin: 0; padding: 0; }}
-    body {{
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      background-color: #0e1117; 
-      display: flex; justify-content: center; align-items: center; padding: 20px;
-    }}
-    /* Centered Flat Baseline Container with Side Whitespaces */
-    .card-container {{ 
-      background-color: #fcf8f2; 
-      width: 100%; 
-      max-width: 680px; 
-      border-radius: 24px; 
-      box-shadow: 0 8px 24px rgba(0,0,0,0.15); 
-      margin: 10px auto;
-      padding: 36px;
-    }}
-    .progress-section {{ display: flex; flex-direction: column; align-items: center; margin-bottom: 24px; }}
-    .progress-circle {{ width: 130px; height: 130px; border-radius: 50%; border: 4px solid #ebd9cb; display: flex; justify-content: center; align-items: center; margin-bottom: 16px; background-color: #fcf8f2; }}
-    .calorie-number {{ font-size: 2.3rem; font-weight: 600; color: #4a3629; }}
-    .calorie-label {{ font-size: 1.1rem; font-weight: 600; color: #634737; }}
-    .calorie-subtext {{ font-size: 0.9rem; color: #a48674; }}
-    
-    .section-title {{ font-size: 0.85rem; font-weight: 700; color: #c0967a; letter-spacing: 0.05em; margin-bottom: 16px; }}
-    .details-grid {{ display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }}
-    
-    .input-box {{ background-color: #ffffff; border: 1px solid #ebd9cb; border-radius: 12px; padding: 12px 16px; display: flex; flex-direction: column; }}
-    .input-label {{ font-size: 0.8rem; color: #bfa18f; font-weight: 500; margin-bottom: 2px; }}
-    
-    .input-wrapper {{ display: flex; align-items: baseline; }}
-    .input-field {{ border: none; outline: none; font-size: 1.25rem; font-weight: 600; color: #4a3629; width: 75%; font-family: inherit; background: transparent; }}
-    .select-field {{ border: none; outline: none; font-size: 1.1rem; font-weight: 600; color: #4a3629; width: 100%; font-family: inherit; background: transparent; cursor: pointer; }}
-    .unit {{ font-size: 0.95rem; font-weight: 400; color: #927563; margin-left: 4px; }}
-    
-    .tip-box {{ background-color: #f2e7dd; border-radius: 12px; padding: 16px; font-size: 0.9rem; color: #7d5a44; margin-top: 24px; }}
-    
-    .cta-button {{
-      background-color: #ca8a56; color: #ffffff; border: none; border-radius: 12px; padding: 16px; font-size: 1rem;
-      font-weight: 600; cursor: pointer; transition: background-color 0.2s ease; width: 100%; text-align: left; padding-left: 24px; margin-top: 20px;
-    }}
-    .cta-button:hover {{ background-color: #b57747; }}
-  </style>
-</head>
-<body>
+# Render Circular Interactive Node Displays
+st.markdown(f"""
+<div class="circle-wrapper">
+    <div class="counter-circle">
+        <span class="metric-number">{st.session_state.computed_value}</span>
+    </div>
+    <div class="metric-title">kcal estimated</div>
+    <div class="metric-sub">based on today's session</div>
+</div>
+<div class="grid-header">Your Details</div>
+""", unsafe_allow_html=True)
 
-  <div class="card-container">
-    <main class="card-body">
-      <section class="progress-section">
-        <div class="progress-circle">
-          <span class="calorie-number">{st.session_state.predicted_calories}</span>
-        </div>
-        <h2 class="calorie-label">kcal estimated</h2>
-        <p class="calorie-subtext">based on today's session</p>
-      </section>
-      
-      <h3 class="section-title">YOUR DETAILS</h3>
-      
-      <div class="details-grid">
-        <div class="input-box">
-          <span class="input-label">Gender</span>
-          <select id="gender" class="select-field">
-            <option value="Male">Male</option>
-            <option value="Female">Female</option>
-          </select>
-        </div>
-        
-        <div class="input-box">
-          <span class="input-label">Age</span>
-          <div class="input-wrapper">
-            <input type="number" id="age" class="input-field" value="25">
-            <span class="unit">yr</span>
-          </div>
-        </div>
-        
-        <div class="input-box">
-          <span class="input-label">Weight</span>
-          <div class="input-wrapper">
-            <input type="number" id="weight" class="input-field" value="72">
-            <span class="unit">kg</span>
-          </div>
-        </div>
-        
-        <div class="input-box">
-          <span class="input-label">Height</span>
-          <div class="input-wrapper">
-            <input type="number" id="height" class="input-field" value="175">
-            <span class="unit">cm</span>
-          </div>
-        </div>
-        
-        <div class="input-box">
-          <span class="input-label">Duration</span>
-          <div class="input-wrapper">
-            <input type="number" id="duration" class="input-field" value="45">
-            <span class="unit">min</span>
-          </div>
-        </div>
-        
-        <div class="input-box">
-          <span class="input-label">Heart rate</span>
-          <div class="input-wrapper">
-            <input type="number" id="heart_rate" class="input-field" value="138">
-            <span class="unit">bpm</span>
-          </div>
-        </div>
+# Streamlit native processing architecture grid blocks
+with st.form(key='fitness_input_form'):
+    row1_col1, row1_col2 = st.columns(2)
+    with row1_col1:
+        gender = st.selectbox("Gender", ["Male", "Female"])
+        weight = st.number_input("Weight (kg)", min_value=1.0, value=72.0, step=1.0)
+        duration = st.number_input("Duration (min)", min_value=1.0, value=45.0, step=1.0)
+    with row1_col2:
+        age = st.number_input("Age (yr)", min_value=1, max_value=120, value=25)
+        height = st.number_input("Height (cm)", min_value=1.0, value=175.0, step=1.0)
+        heart_rate = st.number_input("Heart rate (bpm)", min_value=1.0, value=138.0, step=1.0)
+    
+    # 7TH INTERACTIVE ACCURACY INPUT BLOCK RESTORED
+    body_temp = st.number_input("Body Temperature (°C)", min_value=30.0, max_value=45.0, value=37.0, step=0.1)
 
-        <div class="input-box">
-          <span class="input-label">Body Temperature</span>
-          <div class="input-wrapper">
-            <input type="number" id="body_temp" step="0.1" class="input-field" value="37.0">
-            <span class="unit">°C</span>
-          </div>
-        </div>
-      </div>
-      
-      <div class="tip-box">
+    st.markdown("""
+    <div class="tip-container">
         <p><strong>Tip:</strong> A 30-min brisk walk burns around 180 kcal for your body weight.</p>
-      </div>
-      
-      <button class="cta-button" onclick="sendDataToStreamlit()">Calculate my burn</button>
-    </main>
-  </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    calculate_btn = st.form_submit_button(label="Calculate my burn")
 
-  <script>
-    function sendDataToStreamlit() {{
-      const gender = document.getElementById('gender').value;
-      const age = document.getElementById('age').value;
-      const weight = document.getElementById('weight').value;
-      const height = document.getElementById('height').value;
-      const duration = document.getElementById('duration').value;
-      const heart_rate = document.getElementById('heart_rate').value;
-      const body_temp = document.getElementById('body_temp').value;
-      
-      // Bypasses isolated container framework directly into root python runtime execution
-      const url = new URL(window.parent.location.href);
-      url.searchParams.set('calc', 'true');
-      url.searchParams.set('gender', gender);
-      url.searchParams.set('age', age);
-      url.searchParams.set('weight', weight);
-      url.searchParams.set('height', height);
-      url.searchParams.set('duration', duration);
-      url.searchParams.set('heart_rate', heart_rate);
-      url.searchParams.set('body_temp', body_temp);
-      
-      window.parent.location.href = url.toString();
-    }}
-  </script>
-</body>
-</html>
-"""
+# Execution block logic maps parameters inside backend variables instantly
+if calculate_btn and model is not None:
+    try:
+        gender_code = 0 if gender == "Male" else 1
+        
+        # Exact DataFrame/Array column tracking format mapping: [Gender, Age, Height, Weight, Duration, Heart_Rate, Body_Temp]
+        input_features = np.array([[gender_code, age, height, weight, duration, heart_rate, body_temp]])
+        
+        # Send details directly into the model to update states
+        raw_output = model.predict(input_features)[0]
+        st.session_state.computed_value = max(0, round(float(raw_output)))
+        
+        st.rerun()
+    except Exception as calculation_error:
+        st.error(f"Prediction matrix error: {calculation_error}")
 
-components.html(html_template, height=840, scrolling=False)
+st.markdown('</div>', unsafe_allow_html=True)
