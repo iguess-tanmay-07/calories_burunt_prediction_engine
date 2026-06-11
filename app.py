@@ -25,7 +25,7 @@ st.markdown("""
     header {visibility: hidden;}
     .block-container {padding-top: 2rem;}
     </style>
-""", unsafe_allow_value=True)
+""", unsafe_allow_html=True)
 
 # 2. INITIALIZE SESSION STATE TO STORE THE PREDICTION
 if 'predicted_calories' not in st.session_state:
