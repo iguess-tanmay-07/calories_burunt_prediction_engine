@@ -6,7 +6,7 @@ import numpy as np
 # 1. Load your trained ML model (Adjust the filename/path to match yours)
 @st.cache_resource
 def load_model():
-    with open('model.pkl', 'rb') as f:
+    with open('calories_model.pkl', 'rb') as f:
         return pickle.load(f)
 
 model = load_model()
