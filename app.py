@@ -33,7 +33,7 @@ st.markdown("""
     header {visibility: hidden;}
     
     .stApp {
-        background-color: #0e1117 !important;
+        background-color: #FFFDD0 !important;
         font-family: 'Plus Jakarta Sans', sans-serif !important;
     }
     
