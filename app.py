@@ -22,7 +22,9 @@ heart_rate = st.sidebar.number_input("Heart Rate (bpm)", min_value=40, max_value
 
 # 3. Run the prediction when inputs change
 # (Modify this features array to match the exact order your ML model expects!)
-features = np.array([[age, weight, duration, heart_rate]])
+# --- PREDICTION ---
+# This order matches the exact training shape expected by your XGBoost Regressor
+features = np.array([[gender_numeric, age, height, weight, duration, heart_rate, body_temp]])
 predicted_calories = model.predict(features)[0]
 predicted_calories = round(float(predicted_calories))
 
