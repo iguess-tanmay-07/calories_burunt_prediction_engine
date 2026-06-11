@@ -2,7 +2,7 @@ import streamlit as st
 import pickle
 import numpy as np
 
-# Page standard alignment controls
+# Page standard layout alignment
 st.set_page_config(page_title="Fitness Analytics Engine", layout="centered")
 
 # LOAD THE MACHINE LEARNING MODEL SAFELY
@@ -21,7 +21,7 @@ except Exception as e:
     st.error(f"Model File Load Error: {e}")
     model = None
 
-# CSS INJECTION FOR THE COMPLETE THEME OVERWRITE
+# EXTREME CSS OVERWRITE - CHANGING CLASS NAMES TO CRACK CACHING
 st.markdown("""
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -32,64 +32,64 @@ st.markdown("""
     footer {visibility: hidden;}
     header {visibility: hidden;}
     
-    /* Background Canvas Color */
+    /* Global Background Canvas */
     .stApp {
         background-color: #121316 !important;
         font-family: 'Plus Jakarta Sans', sans-serif !important;
     }
     
-    /* Main Card Container Layout */
-    .main-flat-card {
-        background-color: #fcf8f2;
-        border-radius: 24px;
-        padding: 40px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
-        max-width: 660px;
-        margin: 40px auto;
+    /* Main Layout Card Box */
+    .custom-main-card-v2 {
+        background-color: #fcf8f2 !important;
+        border-radius: 24px !important;
+        padding: 40px !important;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25) !important;
+        max-width: 660px !important;
+        margin: 40px auto !important;
     }
     
     /* Circle Metric Counter Configurations */
     .circle-wrapper {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        margin-bottom: 32px;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        margin-bottom: 32px !important;
     }
     .counter-circle {
-        width: 140px;
-        height: 140px;
-        border-radius: 50%;
-        border: 4px solid #ebd9cb;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        background-color: #fcf8f2;
-        margin-bottom: 14px;
+        width: 140px !important;
+        height: 140px !important;
+        border-radius: 50% !important;
+        border: 4px solid #ebd9cb !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        background-color: #fcf8f2 !important;
+        margin-bottom: 14px !important;
     }
     .metric-number {
-        font-size: 2.6rem;
-        font-weight: 700;
-        color: #4a3629;
+        font-size: 2.6rem !important;
+        font-weight: 700 !important;
+        color: #4a3629 !important;
     }
     .metric-title {
-        font-size: 1.2rem;
-        font-weight: 700;
-        color: #634737;
-        margin-bottom: 2px;
+        font-size: 1.2rem !important;
+        font-weight: 700 !important;
+        color: #634737 !important;
+        margin-bottom: 2px !important;
     }
     .metric-sub {
-        font-size: 0.95rem;
-        color: #a48674;
+        font-size: 0.95rem !important;
+        color: #a48674 !important;
     }
     
     /* Form Section Header styling */
     .grid-header {
-        font-size: 0.85rem;
-        font-weight: 700;
-        color: #c0967a;
-        letter-spacing: 0.06em;
-        margin-bottom: 20px;
-        text-transform: uppercase;
+        font-size: 0.85rem !important;
+        font-weight: 700 !important;
+        color: #c0967a !important;
+        letter-spacing: 0.06em !important;
+        margin-bottom: 20px !important;
+        text-transform: uppercase !important;
     }
     
     /* Transparent Streamlit Form Overrides */
@@ -104,25 +104,31 @@ st.markdown("""
         font-size: 0.82rem !important;
         color: #bfa18f !important;
         font-weight: 700 !important;
-        text-transform: uppercase;
+        text-transform: uppercase !important;
         margin-bottom: 6px !important;
     }
     
-    /* CRITICAL FIX: FORCING BLACK BOXES TO BE WHITE WITH DARK TEXT */
-    div[data-baseweb="select"], div[data-baseweb="input"], .stNumberInput div, .stSelectbox div {
+    /* BRUTAL FORCE OVERWRITE FOR INDIVIDUAL BOXES BACKGROUND TO BE WHITE */
+    div[data-baseweb="select"], 
+    div[data-baseweb="input"], 
+    .stNumberInput div, 
+    .stSelectbox div,
+    div[data-testid="stMarkdownContainer"] + div {
         background-color: #ffffff !important;
         border: 1px solid #ebd9cb !important;
         border-radius: 12px !important;
     }
     
-    input, span, div[role="button"] {
+    /* FORCING TEXT AND NUMBERS INSIDE BOXES TO BE DARK BROWN */
+    input, span, div[role="button"], .stSelectbox p, div[data-baseweb="select"] span {
         color: #4a3629 !important;
         font-size: 1.2rem !important;
         font-weight: 600 !important;
     }
     
-    /* Customizing +/- step buttons inside white boxes */
-    button[data-testid="stNumberInputStepDown"], button[data-testid="stNumberInputStepUp"] {
+    /* Step up and down +/- inner icon buttons background fix */
+    button[data-testid="stNumberInputStepDown"], 
+    button[data-testid="stNumberInputStepUp"] {
         background-color: #fcf8f2 !important;
         color: #4a3629 !important;
         border: none !important;
@@ -130,13 +136,13 @@ st.markdown("""
     
     /* Premium Gray Tip Box Layout */
     .tip-container {
-        background-color: #f2e7dd;
-        border-radius: 12px;
-        padding: 18px;
-        font-size: 0.92rem;
-        color: #7d5a44;
-        margin-top: 28px;
-        margin-bottom: 24px;
+        background-color: #f2e7dd !important;
+        border-radius: 12px !important;
+        padding: 18px !important;
+        font-size: 0.92rem !important;
+        color: #7d5a44 !important;
+        margin-top: 28px !important;
+        margin-bottom: 24px !important;
     }
     
     /* FULL-WIDTH LARGE ACTION BUTTON MATCHING TIP BOX */
@@ -163,8 +169,8 @@ st.markdown("""
 if 'computed_value' not in st.session_state:
     st.session_state.computed_value = 487
 
-# CONTAINER INJECTION
-st.markdown('<div class="main-flat-card">', unsafe_allow_html=True)
+# CONTAINER INJECTION WITH NEW CLASS NAME TO DEFEAT BROWSER CACHE
+st.markdown('<div class="custom-main-card-v2">', unsafe_allow_html=True)
 
 st.markdown(f"""
 <div class="circle-wrapper">
