@@ -18,7 +18,6 @@ except Exception:
 st.set_page_config(page_title="Burnwise", layout="centered")
 
 # Hide standard Streamlit header/footer elements to keep the UI strictly clean
-# Hide standard Streamlit header/footer elements to keep the UI strictly clean
 st.markdown("""
     <style>
     #MainMenu {visibility: hidden;}
@@ -26,7 +25,7 @@ st.markdown("""
     header {visibility: hidden;}
     .block-container {padding-top: 2rem;}
     </style>
-""", unsafe_allow_html=True)  # <-- CHANGED THIS LINE
+""", unsafe_allow_html=True)  # FIXED TYPO HERE
 
 # 2. INITIALIZE SESSION STATE TO STORE THE PREDICTION
 if 'predicted_calories' not in st.session_state:
@@ -88,7 +87,6 @@ html_template = f"""
     .section-title {{ font-size: 0.85rem; font-weight: 700; color: #c0967a; letter-spacing: 0.05em; margin-bottom: -8px; }}
     .details-grid {{ display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }}
     
-    /* Input Styling to perfectly match text spaces */
     .input-box {{ background-color: #ffffff; border: 1px solid #ebd9cb; border-radius: 12px; padding: 12px 16px; display: flex; flex-direction: column; }}
     .input-label {{ font-size: 0.8rem; color: #bfa18f; font-weight: 500; margin-bottom: 2px; }}
     
@@ -99,7 +97,6 @@ html_template = f"""
     
     .tip-box {{ background-color: #f2e7dd; border-radius: 12px; padding: 16px; font-size: 0.9rem; color: #7d5a44; }}
     
-    /* Action Button at the bottom */
     .cta-button {{
       background-color: #ca8a56; color: #ffffff; border: none; border-radius: 12px; padding: 16px; font-size: 1rem;
       font-weight: 600; cursor: pointer; transition: background-color 0.2s ease; width: 100%; text-align: left; padding-left: 24px;
@@ -196,7 +193,6 @@ html_template = f"""
       const heart_rate = document.getElementById('heart_rate').value;
       const body_temp = document.getElementById('body_temp').value;
       
-      // Update browser query string to trigger calculation inside the parent Python runtime frame
       const url = new URL(window.parent.location.href);
       url.searchParams.set('calc', 'true');
       url.searchParams.set('gender', gender);
@@ -214,5 +210,4 @@ html_template = f"""
 </html>
 """
 
-# Render the layout component frame centered directly in the main viewpoint pane
-components.html(html_template, height=720, scrolling=True)
+components.html(html_template, height=780, scrolling=False)
