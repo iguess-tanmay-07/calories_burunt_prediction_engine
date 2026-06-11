@@ -18,6 +18,7 @@ except Exception:
 st.set_page_config(page_title="Burnwise", layout="centered")
 
 # Hide standard Streamlit header/footer elements to keep the UI strictly clean
+# Hide standard Streamlit header/footer elements to keep the UI strictly clean
 st.markdown("""
     <style>
     #MainMenu {visibility: hidden;}
@@ -25,7 +26,7 @@ st.markdown("""
     header {visibility: hidden;}
     .block-container {padding-top: 2rem;}
     </style>
-""", unsafe_allow_html=True)
+""", unsafe_allow_html=True)  # <-- CHANGED THIS LINE
 
 # 2. INITIALIZE SESSION STATE TO STORE THE PREDICTION
 if 'predicted_calories' not in st.session_state:
