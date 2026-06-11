@@ -1,42 +1,44 @@
 import streamlit as st
-import streamlit.components.v1 as components
 import pickle
 import numpy as np
 
-# 1. LOAD YOUR MODEL SAFELY
+# Page configuration for proper spacing (Not looking like a popup)
+st.set_page_config(page_title="Wellness Prediction Engine", layout="centered")
+
+# 1. LOAD YOUR TRAINED XGBOOST MODEL
 @st.cache_resource
 def load_model():
-    with open('calories_model.pkl', 'rb') as f:
-        return pickle.load(f)
+    try:
+        with open('calories_model.pkl', 'rb') as f:
+            return pickle.load(f)
+    except FileNotFoundError:
+        with open('model.pkl', 'rb') as f:
+            return pickle.load(f)
 
 try:
     model = load_model()
-except Exception:
-    with open('model.pkl', 'rb') as f:
-        model = pickle.load(f)
+except Exception as e:
+    st.error(f"Model load nahi ho paya: {e}")
+    model = None
 
-st.set_page_config(page_title="Burnwise", layout="centered")
-
-# Hide standard Streamlit header/footer elements to keep the UI strictly clean
+# Hide default Streamlit structural blocks cleanly
 st.markdown("""
     <style>
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     header {visibility: hidden;}
-    .block-container {padding-top: 2rem;}
+    .block-container {padding-top: 1rem; max-width: 100%;}
     </style>
-""", unsafe_allow_html=True)  # FIXED TYPO HERE
+""", unsafe_allow_html=True)
 
-# 2. INITIALIZE SESSION STATE TO STORE THE PREDICTION
+# 2. SESSION STATE MANAGEMENT FOR CALORIES
 if 'predicted_calories' not in st.session_state:
-    st.session_state.predicted_calories = 487  # Default placeholder value from the mockup
+    st.session_state.predicted_calories = 487
 
-# 3. CAPTURE DATA FROM THE HTML FRONTEND VIA QUERY PARAMS
+# 3. CAPTURE DATA FROM THE INLINE FORM SUBMISSION
 query_params = st.query_params
-
 if 'calc' in query_params:
     try:
-        # Pull parameters sent by the HTML form
         gender_val = 0 if query_params.get('gender', 'Male') == 'Male' else 1
         age_val = int(query_params.get('age', 25))
         height_val = float(query_params.get('height', 175))
@@ -45,20 +47,19 @@ if 'calc' in query_params:
         hr_val = float(query_params.get('heart_rate', 138))
         temp_val = float(query_params.get('body_temp', 37.0))
         
-        # Format for XGBoost: [Gender, Age, Height, Weight, Duration, Heart_Rate, Body_Temp]
-        features = np.array([[gender_val, age_val, height_val, weight_val, duration_val, hr_val, temp_val]])
+        if model is not None:
+            # Exact Kaggle feature matrix schema order
+            features = np.array([[gender_val, age_val, height_val, weight_val, duration_val, hr_val, temp_val]])
+            prediction = model.predict(features)[0]
+            st.session_state.predicted_calories = max(0, round(float(prediction)))
         
-        # Predict and save to session state
-        prediction = model.predict(features)[0]
-        st.session_state.predicted_calories = round(float(prediction))
-        
-        # Clear parameters to prevent infinite loops on page re-run
+        # Clear string queries to prevent calculation loop traps
         st.query_params.clear()
         st.rerun()
     except Exception as e:
-        st.error(f"Prediction processing error: {e}")
+        st.error(f"Calculation mapping crash: {e}")
 
-# 4. MONOLITHIC HTML/CSS APP FRONTEND WITH INLINE EDITABLE INPUTS
+# 4. PURE CLEAN CUSTOM CSS & SEMANTIC FORM ELEMENT GRID
 html_template = f"""
 <!DOCTYPE html>
 <html>
@@ -71,35 +72,40 @@ html_template = f"""
     body {{
       font-family: 'Plus Jakarta Sans', sans-serif;
       background-color: #0e1117; 
-      display: flex; justify-content: center; align-items: center; padding: 10px; overflow-x: hidden;
+      display: flex; justify-content: center; align-items: center; padding: 20px;
     }}
-    .card-container {{ background-color: #fcf8f2; width: 100%; max-width: 650px; border-radius: 24px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); margin: 20px auto; }}
-    .card-header {{ background-color: #f5eae0; padding: 20px 32px; border-top-left-radius: 24px; border-top-right-radius: 24px; display: flex; justify-content: space-between; align-items: center; }}
-    .brand-name {{ font-size: 1.25rem; font-weight: 600; color: #7d5a44; }}
-    .streak-badge {{ background-color: #ebd9cb; color: #8c644d; padding: 6px 16px; border-radius: 20px; font-size: 0.85rem; }}
-    .card-body {{ padding: 32px; display: flex; flex-direction: column; gap: 24px; }}
-    .progress-section {{ display: flex; flex-direction: column; align-items: center; }}
+    /* Centered Flat Baseline Container with Side Whitespaces */
+    .card-container {{ 
+      background-color: #fcf8f2; 
+      width: 100%; 
+      max-width: 680px; 
+      border-radius: 24px; 
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15); 
+      margin: 10px auto;
+      padding: 36px;
+    }}
+    .progress-section {{ display: flex; flex-direction: column; align-items: center; margin-bottom: 24px; }}
     .progress-circle {{ width: 130px; height: 130px; border-radius: 50%; border: 4px solid #ebd9cb; display: flex; justify-content: center; align-items: center; margin-bottom: 16px; background-color: #fcf8f2; }}
-    .calorie-number {{ font-size: 2.2rem; font-weight: 600; color: #4a3629; }}
+    .calorie-number {{ font-size: 2.3rem; font-weight: 600; color: #4a3629; }}
     .calorie-label {{ font-size: 1.1rem; font-weight: 600; color: #634737; }}
     .calorie-subtext {{ font-size: 0.9rem; color: #a48674; }}
     
-    .section-title {{ font-size: 0.85rem; font-weight: 700; color: #c0967a; letter-spacing: 0.05em; margin-bottom: -8px; }}
+    .section-title {{ font-size: 0.85rem; font-weight: 700; color: #c0967a; letter-spacing: 0.05em; margin-bottom: 16px; }}
     .details-grid {{ display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }}
     
     .input-box {{ background-color: #ffffff; border: 1px solid #ebd9cb; border-radius: 12px; padding: 12px 16px; display: flex; flex-direction: column; }}
     .input-label {{ font-size: 0.8rem; color: #bfa18f; font-weight: 500; margin-bottom: 2px; }}
     
     .input-wrapper {{ display: flex; align-items: baseline; }}
-    .input-field {{ border: none; outline: none; font-size: 1.3rem; font-weight: 600; color: #4a3629; width: 70%; font-family: inherit; background: transparent; }}
+    .input-field {{ border: none; outline: none; font-size: 1.25rem; font-weight: 600; color: #4a3629; width: 75%; font-family: inherit; background: transparent; }}
     .select-field {{ border: none; outline: none; font-size: 1.1rem; font-weight: 600; color: #4a3629; width: 100%; font-family: inherit; background: transparent; cursor: pointer; }}
     .unit {{ font-size: 0.95rem; font-weight: 400; color: #927563; margin-left: 4px; }}
     
-    .tip-box {{ background-color: #f2e7dd; border-radius: 12px; padding: 16px; font-size: 0.9rem; color: #7d5a44; }}
+    .tip-box {{ background-color: #f2e7dd; border-radius: 12px; padding: 16px; font-size: 0.9rem; color: #7d5a44; margin-top: 24px; }}
     
     .cta-button {{
       background-color: #ca8a56; color: #ffffff; border: none; border-radius: 12px; padding: 16px; font-size: 1rem;
-      font-weight: 600; cursor: pointer; transition: background-color 0.2s ease; width: 100%; text-align: left; padding-left: 24px;
+      font-weight: 600; cursor: pointer; transition: background-color 0.2s ease; width: 100%; text-align: left; padding-left: 24px; margin-top: 20px;
     }}
     .cta-button:hover {{ background-color: #b57747; }}
   </style>
@@ -107,11 +113,6 @@ html_template = f"""
 <body>
 
   <div class="card-container">
-    <header class="card-header">
-      <h1 class="brand-name">Burnwise</h1>
-      <span class="streak-badge">7 day streak</span>
-    </header>
-    
     <main class="card-body">
       <section class="progress-section">
         <div class="progress-circle">
@@ -172,7 +173,13 @@ html_template = f"""
           </div>
         </div>
 
-        <input type="hidden" id="body_temp" value="37.0">
+        <div class="input-box">
+          <span class="input-label">Body Temperature</span>
+          <div class="input-wrapper">
+            <input type="number" id="body_temp" step="0.1" class="input-field" value="37.0">
+            <span class="unit">°C</span>
+          </div>
+        </div>
       </div>
       
       <div class="tip-box">
@@ -193,6 +200,7 @@ html_template = f"""
       const heart_rate = document.getElementById('heart_rate').value;
       const body_temp = document.getElementById('body_temp').value;
       
+      // Bypasses isolated container framework directly into root python runtime execution
       const url = new URL(window.parent.location.href);
       url.searchParams.set('calc', 'true');
       url.searchParams.set('gender', gender);
@@ -210,4 +218,4 @@ html_template = f"""
 </html>
 """
 
-components.html(html_template, height=780, scrolling=False)
+components.html(html_template, height=840, scrolling=False)
