@@ -61,7 +61,6 @@ html_layout = """
     /* Full width element span for Body Temp to match full structure */
     .full-width-box { grid-column: span 2; }
     
-    .tip-box { background-color: #f2e7dd; border-radius: 12px; padding: 16px; font-size: 0.9rem; color: #7d5a44; margin-top: 24px; }
     
     /* BIG BUTTON AS LARGE AS THE TIP BOX */
     .cta-button {
@@ -143,9 +142,7 @@ html_layout = """
         </div>
       </div>
       
-      <div class="tip-box">
-        <p><strong>Tip:</strong> A 30-min brisk walk burns around 180 kcal for your body weight.</p>
-      </div>
+     
       
       <button class="cta-button" onclick="runXGBoostFormula()">Calculate my burn</button>
     </main>
