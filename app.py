@@ -20,10 +20,36 @@ weight = st.sidebar.number_input("Weight (kg)", min_value=30, max_value=200, val
 duration = st.sidebar.number_input("Duration (min)", min_value=1, max_value=300, value=45)
 heart_rate = st.sidebar.number_input("Heart Rate (bpm)", min_value=40, max_value=220, value=138)
 
-# 3. Run the prediction when inputs change
-# (Modify this features array to match the exact order your ML model expects!)
-# --- PREDICTION ---
-# This order matches the exact training shape expected by your XGBoost Regressor
+# ==========================================
+# 2. CREATE STREAMLIT INPUT CONTROLS (SIDEBAR)
+# ==========================================
+st.sidebar.markdown("## Adjust Fitness Metrics")
+
+# 1. Get the inputs from the user first
+gender = st.sidebar.selectbox("Gender", ["Male", "Female"])
+age = st.sidebar.slider("Age", 1, 100, 25)
+height = st.sidebar.number_input("Height (cm)", value=175)
+weight = st.sidebar.number_input("Weight (kg)", value=72)
+duration = st.sidebar.slider("Duration (mins)", 1, 180, 45)
+heart_rate = st.sidebar.number_input("Heart Rate (bpm)", value=138)
+body_temp = st.sidebar.number_input("Body Temp (°C)", value=37.0)
+
+# 2. DEFINE gender_numeric RIGHT HERE (Before using it in the array)
+gender_numeric = 0 if gender == "Male" else 1
+
+
+# ==========================================
+# 3. COMPUTE ML PREDICTION
+# ==========================================
+# 3. Now it's safe to build the array because gender_numeric exists!
+features = np.array([[gender_numeric, age, height, weight, duration, heart_rate, body_temp]])
+
+try:
+    predicted_calories = model.predict(features)[0]
+    predicted_calories = round(float(predicted_calories))
+except Exception as e:
+    predicted_calories = "--"
+    st.sidebar.error(f"Prediction Error: {e}")
 features = np.array([[gender_numeric, age, height, weight, duration, heart_rate, body_temp]])
 predicted_calories = model.predict(features)[0]
 predicted_calories = round(float(predicted_calories))
