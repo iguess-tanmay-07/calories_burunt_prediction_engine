@@ -27,7 +27,7 @@ html_layout = """
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: 'Plus Jakarta Sans', sans-serif;
-      background-color: #121316; 
+      background-color: #fcf8f2; 
       display: flex; justify-content: center; align-items: center; padding: 10px; overflow: hidden;
     }
     /* Fixed Pastel Flat Container */
