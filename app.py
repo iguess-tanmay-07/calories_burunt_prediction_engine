@@ -118,7 +118,7 @@ html_layout = """
         </div>
         
         <div class="input-box">
-          <span class="input-label">Duration</span>
+          <span class="input-label">Activity Duration</span>
           <div class="input-wrapper">
             <input type="number" id="duration" class="input-field" value="45">
             <span class="unit">min</span>
